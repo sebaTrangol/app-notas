@@ -23,7 +23,7 @@ export default function App() {
           options={{
             title: "NOTAS APP",
             headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#8B1874" },
+            headerStyle: { backgroundColor: "black" },
             headerTintColor: "white",
           }}
         />
@@ -34,7 +34,7 @@ export default function App() {
           options={{
             title: "CREAR NOTAS",
             headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#8B1874" },
+            headerStyle: { backgroundColor: "black" },
             headerTintColor: "white",
           }}
         />
@@ -43,9 +43,9 @@ export default function App() {
           name="Details"
           component={DetailsNote}
           options={{
-            title: "Detalles Notas",
+            title: "DETALLE NOTAS",
             headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#8B1874" },
+            headerStyle: { backgroundColor: "black" },
             headerTintColor: "white",
           }}
         />

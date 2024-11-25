@@ -1,58 +1,89 @@
-import React, { useState, useEffect } from 'react'
-import { Text, StyleSheet, View, TouchableOpacity, Alert } from 'react-native'
+import React, { useState, useEffect } from 'react';
+import { Text, StyleSheet, View, TouchableOpacity, Alert } from 'react-native';
 
-import appFirebase from '../credenciales'
-import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, getDoc, setDoct } from 'firebase/firestore';
-const db = getFirestore(appFirebase)
+import appFirebase from '../credenciales';
+import { getFirestore, doc, deleteDoc, getDoc } from 'firebase/firestore';
+
+const db = getFirestore(appFirebase);
 
 export default function DetailsNote(props) {
+  const [nota, setNota] = useState(null);
 
-  const [nota, setNota] = useState({})
-
-  const getOneNote = async(id)=>{
+  // Función para obtener una nota por su ID
+  const getOneNote = async (id) => {
     try {
-      const docRef = doc(db, 'notas', id)
-      const docSnap = await getDoc(docRef)
-      setNota(docSnap.data())
+      const docRef = doc(db, 'notas', id);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setNota(docSnap.data());
+      } else {
+        Alert.alert('Error', 'La nota no existe.');
+        props.navigation.navigate('Notas');
+      }
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
-  useEffect(()=>{
-    getOneNote(props.route.params.notaId)
-  },[])
+  // UseEffect para cargar los datos de la nota
+  useEffect(() => {
+    getOneNote(props.route.params.notaId);
+  }, []);
 
+  // Función para eliminar la nota
+  const deleteNote = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'notas', id));
+      Alert.alert('Éxito', 'Nota eliminada.');
+      props.navigation.navigate('Notas');
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-  const deleteNote = async(id) =>{
-    await deleteDoc(doc(db,'notas', id))
-    Alert.alert('Exito, nota eliminada.')
-    props.navigation.navigate('Notas')
-  }
- 
+  // Si `nota` aún no está cargada, muestra un mensaje de "Cargando"
+  if (!nota) {
     return (
-      <View>
-        <View style={styles.contenedor}>
-          <Text style={styles.texto}>Titulo: {nota.titulo}</Text>
-          <Text style={styles.texto}>Detalle: {nota.detalle}</Text>
-          <Text style={styles.texto}>Fecha: {nota.fecha}</Text>
-          <Text style={styles.texto}> {nota.hora}</Text>
-
-          <TouchableOpacity style={styles.botonEliminar} onPress={()=>deleteNote(props.route.params.notaId)}>
-            <Text style={styles.textoEliminar}>Eliminar</Text>
-          </TouchableOpacity>
-        </View>
+      <View style={styles.contenedorPadre}>
+        <Text style={styles.texto}>Cargando nota...</Text>
       </View>
-    )
+    );
+  }
+
+  return (
+    <View style={styles.contenedorPadre}>
+      <View style={styles.tarjeta}>
+        <Text style={styles.texto}>Título: {nota.titulo || 'Título no disponible'}</Text>
+        <Text style={styles.texto}>Detalle: {nota.detalle || 'Detalle no disponible'}</Text>
+        <Text style={styles.texto}>Fecha: {nota.fecha || 'Fecha no disponible'}</Text>
+        <Text style={styles.texto}>Hora: {nota.hora || 'Hora no disponible'}</Text>
+
+        <TouchableOpacity
+          style={styles.botonEliminar}
+          onPress={() => deleteNote(props.route.params.notaId)}
+        >
+          <Text style={styles.textoEliminar}>Eliminar</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 }
 
+// Estilos para los elementos del componente
 const styles = StyleSheet.create({
-  contenedor: {
+  contenedorPadre: {
+    flex: 1,
+    backgroundColor: 'black', // Fondo completamente negro
+    justifyContent: 'center', // Centra el contenido verticalmente
+    alignItems: 'center', // Centra el contenido horizontalmente
+    // paddingTop: 0, // Ajusta el espacio superior entre el título y el contenido
+  },
+  tarjeta: {
     margin: 20,
-    backgroundColor: 'white',
+    backgroundColor: 'white', // Fondo blanco de la tarjeta
     borderRadius: 20,
     width: '90%',
-    padding: 10,
+    padding: 20,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -66,6 +97,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginTop: 10,
+    color: 'black', // Texto negro
   },
   botonEliminar: {
     backgroundColor: '#B71375',
