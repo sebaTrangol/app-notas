@@ -39,7 +39,7 @@ export default function Notas(props) {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Botón para agregar nuevas notas */}
         <TouchableOpacity style={styles.boton} onPress={() => props.navigation.navigate('Crear')}>
-          <Text style={styles.textoBoton}>AGREGAR NUEVAS NOTAS</Text>
+          <Text style={styles.textoBoton}>AGREGAR NUEVA NOTA</Text>
         </TouchableOpacity>
 
         {/* Lista de notas */}
