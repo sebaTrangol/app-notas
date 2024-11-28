@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { Text, StyleSheet, View, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import {
+  Text,
+  StyleSheet,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Modal,
+} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import appFirebase from '../credenciales';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
@@ -31,8 +42,8 @@ export default function CreateNote(props) {
   };
 
   const showMode = (currentMode) => {
-    setShow(true);
     setMode(currentMode);
+    setShow(true);
   };
 
   const handlerChangeText = (value, name) => {
@@ -95,9 +106,25 @@ export default function CreateNote(props) {
               <Text style={styles.subtitle}>Hora</Text>
             </TouchableOpacity>
           </View>
+
           {show && (
-            <DateTimePicker value={date} mode={mode} is24Hour={true} display="default" onChange={onChange} />
+            <View style={styles.modalContainer}>
+            <View style={[styles.modalContent, { height: Platform.OS === 'ios' ? 'auto' : 1000 }]}>
+              <DateTimePicker
+                value={date}
+                mode={mode}
+                is24Hour={true}
+                display={Platform.OS === 'ios' ? 'inline' : 'calendar'}
+                onChange={onChange}
+              />
+              <TouchableOpacity style={styles.modalCloseButton} onPress={() => setShow(false)}>
+                <Text style={styles.modalCloseText}>Cerrar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          
           )}
+
           <TouchableOpacity style={styles.botonEnviar} onPress={saveNote}>
             <Text style={styles.textoBtnEnviar}>Guardar Nota</Text>
           </TouchableOpacity>
@@ -156,6 +183,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   textoBtnEnviar: {
+    color: 'white',
+    fontSize: 16,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '90%',
+    justifyContent: 'center',
+  },
+  modalCloseButton: {
+    marginTop: 10,
+    alignItems: 'center',
+    backgroundColor: '#B71375',
+    borderRadius: 5,
+    padding: 10,
+  },
+  modalCloseText: {
     color: 'white',
     fontSize: 16,
   },
