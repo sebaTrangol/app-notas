@@ -1,0 +1,49 @@
+-- -- -- -- INICIAR PROYECTO
+
+-- -- -------------------------- Crear un nuevo repositorio y subir tu proyecto --------------------------
+-- -- ----------------------------------------------------------------------------------------------------------------------------------
+-- -- -- Inicia un repositorio en tu carpeta local:
+-- --    git init
+-- -- -- Añade todos los archivos al área de preparación (staging):
+-- --    git add .
+-- -- -- Crea el primer commit con un mensaje:
+-- --    git commit -m "Primer commit"
+-- -- -- Conecta tu proyecto local a un repositorio remoto (GitHub, GitLab, etc.):
+-- --    git remote add origin https://github.com/TuUsuario/TuRepositorio.git
+-- -- -- Sube tu proyecto al repositorio remoto:
+-- --    git push -u origin main
+-- -- -- Nota: Si tu rama principal no se llama main, reemplaza main por el nombre de tu rama.
+
+-- -- --------------------- Descargar un proyecto existente (Clonar un repositorio) ---------------------------------------------------
+-- -- ----------------------------------------------------------------------------------------------------------------------------------
+
+-- -- --Clona el repositorio a tu equipo:
+-- -- git clone https://github.com/TuUsuario/TuRepositorio.git
+-- -- --Entra en la carpeta del proyecto:
+-- -- cd TuRepositorio
+
+-- -- --------------------Actualizar tu proyecto local con los cambios del repositorio remoto
+-- -- -----------------------------------------------------------------------------------------------------------------------------------
+-- -- --Descarga y aplica los últimos cambios del repositorio remoto:
+-- -- git pull origin main
+
+-- -- -------------------Verificar el estado del repositorio
+-- -- -----------------------------------------------------------------------------------------------------------------------------------
+-- -- --Ver cambios sin trackear, en staging o pendientes de commit:
+-- -- git status
+
+-- -- -----------------Ver el historial de commits:
+-- -- git log
+
+-- --------Primero, verifica todas las ramas disponibles en tu repositorio:
+-----------------------------------------------------------------------------------------------------------------------------------
+-- git branch
+
+---------CAMBIAR DE RAMA
+--git checkout fondo-negro
+
+-- -------- limpiar el proyecto
+-- expo start -c 
+
+--------- INICIAR PROYECTO
+-- npx expo start
