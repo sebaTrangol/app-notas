@@ -7,10 +7,15 @@ import {
   StyleSheet,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import appFirebase from '../credenciales';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
 
-export default function CreateNote() {
+const db = getFirestore(appFirebase);
+
+export default function CreateNote(props) {
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -34,6 +39,29 @@ export default function CreateNote() {
       setSelectedTime(
         `${selectedValue.getHours()}:${selectedValue.getMinutes()}`
       );
+    }
+  };
+
+  const saveNote = async () => {
+    if (!title || !detail || !selectedDate || !selectedTime) {
+      Alert.alert('Error', 'Todos los campos son obligatorios');
+      return;
+    }
+
+    const note = {
+      titulo: title,
+      detalle: detail,
+      fecha: selectedDate,
+      hora: selectedTime,
+    };
+
+    try {
+      await addDoc(collection(db, 'notas'), note);
+      Alert.alert('Éxito', 'Nota guardada con éxito');
+      props.navigation.navigate('Notas'); // Regresa al inicio
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Hubo un problema al guardar la nota');
     }
   };
 
@@ -106,12 +134,7 @@ export default function CreateNote() {
 
       <TouchableOpacity
         style={[styles.button, { marginTop: 20 }]}
-        onPress={() => {
-          console.log('Título:', title);
-          console.log('Detalle:', detail);
-          console.log('Fecha:', selectedDate);
-          console.log('Hora:', selectedTime);
-        }}
+        onPress={saveNote}
       >
         <Text style={styles.buttonText}>Guardar Nota</Text>
       </TouchableOpacity>
@@ -125,13 +148,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
-    padding: 20
+    padding: 20,
   },
   label: {
     fontSize: 16,
     marginBottom: 5,
     color: '#333',
-    alignSelf: 'flex-start'
+    alignSelf: 'flex-start',
   },
   input: {
     width: '100%',
@@ -140,17 +163,17 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     borderRadius: 5,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
   },
   button: {
     backgroundColor: '#B71375',
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
-    width: '100%'
+    width: '100%',
   },
   buttonText: {
     color: 'white',
     fontSize: 16,
-  }
+  },
 });
