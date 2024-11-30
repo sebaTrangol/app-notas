@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,16 +6,16 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
-  ScrollView,
   Alert,
+  ScrollView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import appFirebase from '../credenciales';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
 
 const db = getFirestore(appFirebase);
 
-export default function CreateNote(props) {
+export default function EditNote(props) {
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -23,6 +23,32 @@ export default function CreateNote(props) {
   const [selectedTime, setSelectedTime] = useState('');
   const [title, setTitle] = useState('');
   const [detail, setDetail] = useState('');
+
+  const noteId = props.route.params.notaId;
+
+  // Función para obtener los datos de la nota
+  const getNoteData = async (id) => {
+    try {
+      const docRef = doc(db, 'notas', id);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const { titulo, detalle, fecha, hora } = docSnap.data();
+        setTitle(titulo || '');
+        setDetail(detalle || '');
+        setSelectedDate(fecha || '');
+        setSelectedTime(hora || '');
+      } else {
+        Alert.alert('Error', 'La nota no existe.');
+        props.navigation.goBack();
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getNoteData(noteId);
+  }, []);
 
   const onDateChange = (event, selectedValue) => {
     setShowDatePicker(false);
@@ -42,26 +68,25 @@ export default function CreateNote(props) {
     }
   };
 
-  const saveNote = async () => {
+  const saveChanges = async () => {
     if (!title || !detail || !selectedDate || !selectedTime) {
       Alert.alert('Error', 'Todos los campos son obligatorios');
       return;
     }
 
-    const note = {
-      titulo: title,
-      detalle: detail,
-      fecha: selectedDate,
-      hora: selectedTime,
-    };
-
     try {
-      await addDoc(collection(db, 'notas'), note);
-      Alert.alert('Éxito', 'Nota guardada con éxito');
-      props.navigation.navigate('Notas'); // Regresa al inicio
+      const docRef = doc(db, 'notas', noteId);
+      await updateDoc(docRef, {
+        titulo: title,
+        detalle: detail,
+        fecha: selectedDate,
+        hora: selectedTime,
+      });
+      Alert.alert('Éxito', 'Nota actualizada con éxito');
+      props.navigation.navigate('Notas'); // Regresa a la pantalla de notas
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Hubo un problema al guardar la nota');
+      Alert.alert('Error', 'No se pudo actualizar la nota');
     }
   };
 
@@ -70,7 +95,7 @@ export default function CreateNote(props) {
       <Text style={styles.label}>Título:</Text>
       <TextInput
         style={styles.input}
-        placeholder="Ingresa el Título"
+        placeholder="Editar Título"
         value={title}
         onChangeText={setTitle}
       />
@@ -78,7 +103,7 @@ export default function CreateNote(props) {
       <Text style={styles.label}>Detalle:</Text>
       <TextInput
         style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
-        placeholder="Ingresa el Detalle"
+        placeholder="Editar Detalle"
         multiline={true}
         numberOfLines={4}
         value={detail}
@@ -96,7 +121,7 @@ export default function CreateNote(props) {
         style={styles.button}
         onPress={() => setShowDatePicker(true)}
       >
-        <Text style={styles.buttonText}>Seleccionar Fecha</Text>
+        <Text style={styles.buttonText}>Editar Fecha</Text>
       </TouchableOpacity>
 
       <Text style={styles.label}>Hora seleccionada:</Text>
@@ -110,7 +135,7 @@ export default function CreateNote(props) {
         style={styles.button}
         onPress={() => setShowTimePicker(true)}
       >
-        <Text style={styles.buttonText}>Seleccionar Hora</Text>
+        <Text style={styles.buttonText}>Editar Hora</Text>
       </TouchableOpacity>
 
       {showDatePicker && (
@@ -134,9 +159,9 @@ export default function CreateNote(props) {
 
       <TouchableOpacity
         style={[styles.button, { marginTop: 20 }]}
-        onPress={saveNote}
+        onPress={saveChanges}
       >
-        <Text style={styles.buttonText}>Guardar Nota</Text>
+        <Text style={styles.buttonText}>Guardar Cambios</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -147,53 +172,33 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB', // Fondo gris claro
+    backgroundColor: '#f5f5f5',
     padding: 20,
   },
   label: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 16,
     marginBottom: 5,
-    color: '#333', // Gris oscuro
+    color: '#333',
     alignSelf: 'flex-start',
   },
   input: {
     width: '100%',
-    borderColor: '#E5E7EB', // Gris tenue
+    borderColor: 'gray',
     borderWidth: 1,
-    padding: 15,
-    marginBottom: 15,
-    borderRadius: 10, // Bordes redondeados
-    backgroundColor: '#FFFFFF', // Blanco
-    fontSize: 16,
-    color: '#333',
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 5,
+    backgroundColor: 'white',
   },
   button: {
-    backgroundColor: '#3B82F6', // Azul vibrante para botones
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: '#B71375',
+    padding: 10,
+    borderRadius: 5,
     alignItems: 'center',
     width: '100%',
-    shadowColor: '#000', // Sombra
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: 'white',
     fontSize: 16,
-    fontWeight: 'bold',
-  },
-  card: {
-    backgroundColor: '#FFFFFF', // Fondo blanco
-    borderRadius: 10,
-    padding: 20,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
   },
 });

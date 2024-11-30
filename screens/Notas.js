@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import appFirebase from '../credenciales';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
-import { ListItem } from '@rneui/themed';
+import { getFirestore, collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
+import { ListItem, Icon } from '@rneui/themed';
 
 // Inicialización de Firestore
 const db = getFirestore(appFirebase);
@@ -34,95 +34,126 @@ export default function Notas(props) {
     getLista();
   }, []);
 
-  return (
-    <View style={styles.contenedorPadre}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Botón para agregar nuevas notas */}
-        <TouchableOpacity style={styles.boton} onPress={() => props.navigation.navigate('Crear')}>
-          <Text style={styles.textoBoton}>AGREGAR NUEVA NOTA</Text>
-        </TouchableOpacity>
+  const deleteNote = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'notas', id));
+      Alert.alert('Éxito', 'Nota eliminada');
+      setLista(lista.filter((nota) => nota.id !== id)); // Actualizar lista localmente
+    } catch (error) {
+      console.log(error);
+      Alert.alert('Error', 'No se pudo eliminar la nota');
+    }
+  };
 
+  return (
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Lista de notas */}
-        <View>
-          {lista && lista.length > 0 ? (
-            lista.map((not) => (
-              <ListItem
-                containerStyle={styles.notaContainer}
-                key={not.id}
-                bottomDivider
-                onPress={() => {
-                  props.navigation.navigate('Details', {
-                    notaId: not.id,
-                  });
-                }}
-              >
-                <ListItem.Content>
-                  <ListItem.Title style={styles.titulo}>
-                    {not.titulo || 'Título no disponible'}
-                  </ListItem.Title>
-                  <ListItem.Subtitle style={styles.subtitulo}>
-                    {not.fecha || 'Fecha no disponible'}
-                  </ListItem.Subtitle>
-                </ListItem.Content>
-              </ListItem>
-            ))
-          ) : (
-            <Text style={styles.textoNoNotas}>No hay notas disponibles</Text>
-          )}
-        </View>
+        {lista && lista.length > 0 ? (
+          lista.map((not) => (
+            <View style={styles.card} key={not.id}>
+              <View style={styles.cardHeader}>
+                {/* Título como botón */}
+                <TouchableOpacity
+                  style={styles.cardTitleWrapper}
+                  onPress={() => props.navigation.navigate('Details', { notaId: not.id })}
+                >
+                  <Text style={styles.cardTitle}>{not.titulo || 'Sin título'}</Text>
+                </TouchableOpacity>
+                <View style={styles.cardIcons}>
+                  {/* Icono Editar */}
+                  <TouchableOpacity
+                      onPress={() => props.navigation.navigate('EditNote', { notaId: not.id })}
+                    >
+                      <Icon name="edit" type="feather" size={20} color="#3B82F6" />
+                  </TouchableOpacity>
+
+                  {/* Icono Eliminar */}
+                  <TouchableOpacity onPress={() => deleteNote(not.id)}>
+                    <Icon name="trash" type="feather" size={20} color="#EF4444" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <Text style={styles.cardSubtitle}>{not.fecha || 'Sin fecha'}</Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.noNotesText}>No hay notas disponibles</Text>
+        )}
       </ScrollView>
+
+      {/* FAB para agregar nueva nota */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => props.navigation.navigate('Crear')}
+      >
+        <Icon name="plus" type="feather" size={24} color="white" />
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  contenedorPadre: {
+  container: {
     flex: 1,
-    backgroundColor: 'black', // Fondo negro de la pantalla
-    paddingTop: 50 // Mueve el contenido hacia abajo
+    backgroundColor: '#F9FAFB', // Fondo claro
   },
   scrollContainer: {
-    paddingHorizontal: 10,
-    paddingBottom: 20, // Espaciado adicional al final
+    padding: 15,
   },
-  boton: {
+  card: {
     backgroundColor: 'white',
-    borderBlockColor: 'white',
-    borderWidth: 0,
-    borderRadius: 20,
-    marginBottom: 20,
-    marginHorizontal: 20, // Añadir margen a los lados
-    paddingHorizontal: 10,
-  },
-  textoBoton: {
-    textAlign: 'center',
-    padding: 10,
-    color: 'black', // Texto oscuro para el botón
-    fontSize: 16,
-  },
-  notaContainer: {
-    backgroundColor: 'white', // Fondo blanco para cada nota
     borderRadius: 10,
-    marginHorizontal: 10,
-    marginBottom: 10,
-    padding: 10,
+    padding: 15,
+    marginBottom: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardTitleWrapper: {
+    flex: 1, // Esto asegura que el área táctil del título sea amplia
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1F2937', // Gris oscuro
+  },
+  cardIcons: {
+    flexDirection: 'row',
+    gap: 10, // Espacio entre los iconos
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: '#6B7280', // Gris tenue
+    marginTop: 5,
+  },
+  noNotesText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#9CA3AF',
+    marginTop: 20,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: '#3B82F6', // Azul vibrante
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
-  },
-  titulo: {
-    fontWeight: 'bold',
-    color: 'black', // Texto negro para el título
-  },
-  subtitulo: {
-    color: 'gray', // Texto gris para el subtítulo
-  },
-  textoNoNotas: {
-    textAlign: 'center',
-    fontSize: 18,
-    color: 'gray',
-    marginTop: 20,
   },
 });

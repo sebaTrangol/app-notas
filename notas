@@ -47,3 +47,23 @@
 
 --------- INICIAR PROYECTO
 -- npx expo start
+
+------------------PARA VER EN QUE RAMA ESTOY ----
+-----------------
+
+-- git branch
+
+-- 1. Cambiar a la rama fondo-negro
+-- git checkout fondo-negro
+
+-- 2. Verificar el estado del repositorio
+-- git status
+
+-- 3. Añadir los cambios al área de preparación (staging area)
+
+-- git add .
+-- 4. Crear un commit con un mensaje descriptivo
+-- git commit -m "Actualización de CreateNote: mejoras en inputs y estilos"
+
+-- 5. Enviar los cambios a GitHub
+-- git push origin fondo-negro
