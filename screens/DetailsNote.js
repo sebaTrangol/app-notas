@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Text, StyleSheet, View, TouchableOpacity, Alert } from 'react-native';
+import { Icon } from '@rneui/themed';
 
 import appFirebase from '../credenciales';
 import { getFirestore, doc, deleteDoc, getDoc } from 'firebase/firestore';
@@ -44,74 +45,94 @@ export default function DetailsNote(props) {
   // Si `nota` aún no está cargada, muestra un mensaje de "Cargando"
   if (!nota) {
     return (
-      <View style={styles.contenedorPadre}>
-        <Text style={styles.texto}>Cargando nota...</Text>
+      <View style={styles.container}>
+        <Text style={styles.loadingText}>Cargando nota...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.contenedorPadre}>
-      <View style={styles.tarjeta}>
-        <Text style={styles.texto}>Título: {nota.titulo || 'Título no disponible'}</Text>
-        <Text style={styles.texto}>Detalle: {nota.detalle || 'Detalle no disponible'}</Text>
-        <Text style={styles.texto}>Fecha: {nota.fecha || 'Fecha no disponible'}</Text>
-        <Text style={styles.texto}>Hora: {nota.hora || 'Hora no disponible'}</Text>
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <Text style={styles.title}>Título:</Text>
+        <Text style={styles.content}>{nota.titulo || 'Título no disponible'}</Text>
 
+        <Text style={styles.title}>Detalle:</Text>
+        <Text style={styles.content}>{nota.detalle || 'Detalle no disponible'}</Text>
+
+        <Text style={styles.title}>Fecha:</Text>
+        <Text style={styles.content}>{nota.fecha || 'Fecha no disponible'}</Text>
+
+        <Text style={styles.title}>Hora:</Text>
+        <Text style={styles.content}>{nota.hora || 'Hora no disponible'}</Text>
+
+        {/* Botón para eliminar */}
         <TouchableOpacity
-          style={styles.botonEliminar}
+          style={styles.deleteButton}
           onPress={() => deleteNote(props.route.params.notaId)}
         >
-          <Text style={styles.textoEliminar}>Eliminar</Text>
+          <Icon name="trash" type="feather" size={24} color="white" />
+          <Text style={styles.deleteButtonText}>Eliminar Nota</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
 
-// Estilos para los elementos del componente
+// Estilos
 const styles = StyleSheet.create({
-  contenedorPadre: {
+  container: {
     flex: 1,
-    backgroundColor: 'black', // Fondo completamente negro
-    justifyContent: 'center', // Centra el contenido verticalmente
-    alignItems: 'center', // Centra el contenido horizontalmente
-    // paddingTop: 0, // Ajusta el espacio superior entre el título y el contenido
+    backgroundColor: '#F9FAFB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 15,
   },
-  tarjeta: {
-    margin: 20,
-    backgroundColor: 'white', // Fondo blanco de la tarjeta
-    borderRadius: 20,
-    width: '90%',
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 10,
     padding: 20,
+    width: '100%',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    marginBottom: 5,
+  },
+  content: {
+    fontSize: 14,
+    color: '#374151',
+    marginBottom: 15,
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#EF4444',
+    padding: 15,
+    borderRadius: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
-  },
-  texto: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginTop: 10,
-    color: 'black', // Texto negro
-  },
-  botonEliminar: {
-    backgroundColor: '#B71375',
-    borderColor: '#FC4F00',
-    borderWidth: 3,
-    borderRadius: 20,
-    marginLeft: 20,
-    marginRight: 20,
     marginTop: 20,
   },
-  textoEliminar: {
-    textAlign: 'center',
-    padding: 10,
+  deleteButtonText: {
     color: 'white',
     fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#9CA3AF',
+    textAlign: 'center',
   },
 });

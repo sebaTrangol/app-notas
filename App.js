@@ -9,7 +9,7 @@ import Notas from './screens/Notas'; // Pantalla "Notas"
 import CreateNote from './screens/CreateNote'; // Pantalla "Crear Notas"
 import DetailsNote from './screens/DetailsNote'; // Pantalla "Detalles Notas"
 import EditNote from './screens/EditNote'; // Pantalla editar notas
-
+ 
 export default function App() {
   const Stack = createStackNavigator();
 
@@ -29,7 +29,7 @@ export default function App() {
           component={Notas}
           options={{
             headerLeft: null, // Elimina el botón de regreso en esta pantalla
-            title: "NOTAS APP",
+            title: "MIS NOTAS",
           }}
         />
 

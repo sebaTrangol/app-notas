@@ -60,8 +60,8 @@
 -- git status
 
 -- 3. Añadir los cambios al área de preparación (staging area)
-
 -- git add .
+
 -- 4. Crear un commit con un mensaje descriptivo
 -- git commit -m "Actualización de CreateNote: mejoras en inputs y estilos"
 

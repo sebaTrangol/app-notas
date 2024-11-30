@@ -26,7 +26,6 @@ export default function EditNote(props) {
 
   const noteId = props.route.params.notaId;
 
-  // Función para obtener los datos de la nota
   const getNoteData = async (id) => {
     try {
       const docRef = doc(db, 'notas', id);
@@ -83,7 +82,7 @@ export default function EditNote(props) {
         hora: selectedTime,
       });
       Alert.alert('Éxito', 'Nota actualizada con éxito');
-      props.navigation.navigate('Notas'); // Regresa a la pantalla de notas
+      props.navigation.navigate('Notas');
     } catch (error) {
       console.error(error);
       Alert.alert('Error', 'No se pudo actualizar la nota');
@@ -92,77 +91,79 @@ export default function EditNote(props) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.label}>Título:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Editar Título"
-        value={title}
-        onChangeText={setTitle}
-      />
-
-      <Text style={styles.label}>Detalle:</Text>
-      <TextInput
-        style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
-        placeholder="Editar Detalle"
-        multiline={true}
-        numberOfLines={4}
-        value={detail}
-        onChangeText={setDetail}
-      />
-
-      <Text style={styles.label}>Fecha seleccionada:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Seleccionar Fecha"
-        value={selectedDate}
-        editable={false}
-      />
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => setShowDatePicker(true)}
-      >
-        <Text style={styles.buttonText}>Editar Fecha</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.label}>Hora seleccionada:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Seleccionar Hora"
-        value={selectedTime}
-        editable={false}
-      />
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => setShowTimePicker(true)}
-      >
-        <Text style={styles.buttonText}>Editar Hora</Text>
-      </TouchableOpacity>
-
-      {showDatePicker && (
-        <DateTimePicker
-          value={date}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'inline' : 'default'}
-          onChange={onDateChange}
+      <View style={styles.card}>
+        <Text style={styles.label}>Título:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Editar Título"
+          value={title}
+          onChangeText={setTitle}
         />
-      )}
 
-      {showTimePicker && (
-        <DateTimePicker
-          value={date}
-          mode="time"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          is24Hour={true}
-          onChange={onTimeChange}
+        <Text style={styles.label}>Detalle:</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          placeholder="Editar Detalle"
+          multiline={true}
+          numberOfLines={4}
+          value={detail}
+          onChangeText={setDetail}
         />
-      )}
 
-      <TouchableOpacity
-        style={[styles.button, { marginTop: 20 }]}
-        onPress={saveChanges}
-      >
-        <Text style={styles.buttonText}>Guardar Cambios</Text>
-      </TouchableOpacity>
+        <Text style={styles.label}>Fecha seleccionada:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Seleccionar Fecha"
+          value={selectedDate}
+          editable={false}
+        />
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => setShowDatePicker(true)}
+        >
+          <Text style={styles.buttonText}>Editar Fecha</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.label}>Hora seleccionada:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Seleccionar Hora"
+          value={selectedTime}
+          editable={false}
+        />
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => setShowTimePicker(true)}
+        >
+          <Text style={styles.buttonText}>Editar Hora</Text>
+        </TouchableOpacity>
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'inline' : 'default'}
+            onChange={onDateChange}
+          />
+        )}
+
+        {showTimePicker && (
+          <DateTimePicker
+            value={date}
+            mode="time"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            is24Hour={true}
+            onChange={onTimeChange}
+          />
+        )}
+
+        <TouchableOpacity
+          style={[styles.button, styles.saveButton]}
+          onPress={saveChanges}
+        >
+          <Text style={[styles.buttonText, styles.saveButtonText]}>Guardar Cambios</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
@@ -170,35 +171,64 @@ export default function EditNote(props) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
+    backgroundColor: '#F9FAFB',
+    padding: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+  },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 10,
     padding: 20,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   label: {
     fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1F2937',
     marginBottom: 5,
-    color: '#333',
-    alignSelf: 'flex-start',
   },
   input: {
-    width: '100%',
-    borderColor: 'gray',
+    borderColor: '#D1D5DB',
     borderWidth: 1,
+    borderRadius: 8,
     padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
+    marginBottom: 15,
+  },
+  textArea: {
+    height: 80,
+    textAlignVertical: 'top',
   },
   button: {
-    backgroundColor: '#B71375',
-    padding: 10,
-    borderRadius: 5,
+    backgroundColor: '#3B82F6',
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderRadius: 8,
     alignItems: 'center',
-    width: '100%',
+    marginBottom: 10,
   },
   buttonText: {
-    color: 'white',
+    color: '#FFFFFF',
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  saveButton: {
+    backgroundColor: '#10B981', // Verde para diferenciar
+    marginTop: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  saveButtonText: {
+    fontSize: 18, // Tamaño más grande
+    fontWeight: '700', // Texto en negrita
   },
 });
