@@ -1,46 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import appFirebase from '../credenciales';
-import { getFirestore, collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
-import { ListItem, Icon } from '@rneui/themed';
+import { getFirestore, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { Icon } from '@rneui/themed';
 
-// Inicialización de Firestore
 const db = getFirestore(appFirebase);
 
 export default function Notas(props) {
   const [lista, setLista] = useState([]);
 
   useEffect(() => {
-    const getLista = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'notas'));
-        const docs = [];
-        querySnapshot.forEach((doc) => {
-          const { titulo, detalle, fecha, hora } = doc.data();
-          docs.push({
-            id: doc.id,
-            titulo,
-            detalle,
-            fecha,
-            hora,
+    const getLista = () => {
+      const notesQuery = query(collection(db, 'notas'), orderBy('timestamp', 'desc'));
+      const unsubscribe = onSnapshot(
+        notesQuery,
+        (querySnapshot) => {
+          const docs = [];
+          querySnapshot.forEach((doc) => {
+            const { titulo, detalle, fecha, hora } = doc.data();
+            docs.push({
+              id: doc.id,
+              titulo: titulo || 'Sin título',
+              detalle: detalle || '',
+              fecha: fecha || '',
+              hora: hora || '',
+            });
           });
-        });
-        setLista(docs);
-      } catch (error) {
-        console.log(error);
-      }
+          setLista(docs); // Actualiza la lista
+        },
+        (error) => {
+          console.error('Error al obtener las notas:', error);
+        }
+      );
+      return unsubscribe; // Limpia la suscripción al desmontar
     };
 
-    getLista();
+    const unsubscribe = getLista();
+    return () => unsubscribe();
   }, []);
 
   const deleteNote = async (id) => {
     try {
       await deleteDoc(doc(db, 'notas', id));
       Alert.alert('Éxito', 'Nota eliminada');
-      setLista(lista.filter((nota) => nota.id !== id)); // Actualizar lista localmente
+      setLista((prevLista) => prevLista.filter((nota) => nota.id !== id)); // Actualiza localmente
     } catch (error) {
-      console.log(error);
+      console.error('Error al eliminar la nota:', error);
       Alert.alert('Error', 'No se pudo eliminar la nota');
     }
   };
@@ -48,45 +54,33 @@ export default function Notas(props) {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Lista de notas */}
-        {lista && lista.length > 0 ? (
-          lista.map((not) => (
-            <View style={styles.card} key={not.id}>
+        {lista.length > 0 ? (
+          lista.map((nota) => (
+            <View style={styles.card} key={nota.id}>
               <View style={styles.cardHeader}>
-                {/* Título como botón */}
                 <TouchableOpacity
                   style={styles.cardTitleWrapper}
-                  onPress={() => props.navigation.navigate('Details', { notaId: not.id })}
+                  onPress={() => props.navigation.navigate('Details', { notaId: nota.id })}
                 >
-                  <Text style={styles.cardTitle}>{not.titulo || 'Sin título'}</Text>
+                  <Text style={styles.cardTitle}>{nota.titulo}</Text>
                 </TouchableOpacity>
                 <View style={styles.cardIcons}>
-                  {/* Icono Editar */}
-                  <TouchableOpacity
-                      onPress={() => props.navigation.navigate('EditNote', { notaId: not.id })}
-                    >
-                      <Icon name="edit" type="feather" size={20} color="#3B82F6" />
+                  <TouchableOpacity onPress={() => props.navigation.navigate('EditNote', { notaId: nota.id })}>
+                    <Icon name="edit" type="feather" size={20} color="#3B82F6" />
                   </TouchableOpacity>
-
-                  {/* Icono Eliminar */}
-                  <TouchableOpacity onPress={() => deleteNote(not.id)}>
+                  <TouchableOpacity onPress={() => deleteNote(nota.id)}>
                     <Icon name="trash" type="feather" size={20} color="#EF4444" />
                   </TouchableOpacity>
                 </View>
               </View>
-              <Text style={styles.cardSubtitle}>{not.fecha || 'Sin fecha'}</Text>
+              <Text style={styles.cardSubtitle}>{nota.fecha}</Text>
             </View>
           ))
         ) : (
           <Text style={styles.noNotesText}>No hay notas disponibles</Text>
         )}
       </ScrollView>
-
-      {/* FAB para agregar nueva nota */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => props.navigation.navigate('Crear')}
-      >
+      <TouchableOpacity style={styles.fab} onPress={() => props.navigation.navigate('Crear')}>
         <Icon name="plus" type="feather" size={24} color="white" />
       </TouchableOpacity>
     </View>
@@ -96,7 +90,7 @@ export default function Notas(props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB', // Fondo claro
+    backgroundColor: '#F9FAFB',
   },
   scrollContainer: {
     padding: 15,
@@ -118,20 +112,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cardTitleWrapper: {
-    flex: 1, // Esto asegura que el área táctil del título sea amplia
+    flex: 1,
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1F2937', // Gris oscuro
+    color: '#1F2937',
   },
   cardIcons: {
     flexDirection: 'row',
-    gap: 10, // Espacio entre los iconos
+    gap: 10,
   },
   cardSubtitle: {
     fontSize: 14,
-    color: '#6B7280', // Gris tenue
+    color: '#6B7280',
     marginTop: 5,
   },
   noNotesText: {
@@ -144,7 +138,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 20,
-    backgroundColor: '#3B82F6', // Azul vibrante
+    backgroundColor: '#3B82F6',
     width: 60,
     height: 60,
     borderRadius: 30,

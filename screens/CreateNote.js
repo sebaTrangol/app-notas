@@ -12,6 +12,8 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import appFirebase from '../credenciales';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { serverTimestamp } from 'firebase/firestore';
+
 
 const db = getFirestore(appFirebase);
 
@@ -59,6 +61,7 @@ export default function CreateNote(props) {
       detalle: detail,
       fecha: selectedDate,
       hora: selectedTime,
+      timestamp: serverTimestamp(), // Esto genera un timestamp al momento de guardar
     };
 
     try {
